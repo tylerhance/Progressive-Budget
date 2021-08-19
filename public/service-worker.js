@@ -41,9 +41,9 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
     event.respondWith(
-        caches.match(event.request).then((res) => {
+        caches.match(event.request).then((r) => {
             console.log("Service Worker is fetching resource: " + event.request.url);
-            return res || fetch(event.request).then((response) => {
+            return r || fetch(event.request).then((response) => {
                 return caches.open(cacheName).then((cache) => {
                     console.log("Service Worker is caching new resource: " + event.request.url);
                     cache.put(event.request, request.clone());
