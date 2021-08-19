@@ -1,5 +1,3 @@
-const { response, request } = require("express");
-
 const cacheFiles = [
     "/",
     "/styles.css",
@@ -41,9 +39,9 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
     event.respondWith(
-        caches.match(event.request).then((r) => {
+        caches.match(event.request).then((res) => {
             console.log("Service Worker is fetching resource: " + event.request.url);
-            return r || fetch(event.request).then((response) => {
+            return res || fetch(event.request).then((response) => {
                 return caches.open(cacheName).then((cache) => {
                     console.log("Service Worker is caching new resource: " + event.request.url);
                     cache.put(event.request, request.clone());
