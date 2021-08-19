@@ -1,3 +1,5 @@
+const { response, request } = require("express");
+
 const cacheFiles = [
     "/",
     "/styles.css",
@@ -9,7 +11,7 @@ const cacheFiles = [
     "/icons/icon-512x512.png"
 ];
 
-const cacheName = "static-cache-v2";
+const cacheName = "static-cache-v1";
 const dataCacheName = "data-cache-v1";
 
 self.addEventListener("install", (event) => {
@@ -21,3 +23,33 @@ self.addEventListener("install", (event) => {
     )
 });
 
+self.addEventListener("activate", (event) => {
+    event.waitUntil(
+        caches.keys().then(keyList => {
+            return Promise.all(
+                keyList.map(key => {
+                    if(key !== cacheName && key !== dataCacheName) {
+                        console.log("Removing old cache data.", key);
+                        return caches.delete(key);
+                    }
+                })
+            )
+        })
+    )
+    self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+    event.respondWith(
+        caches.match(event.request).then((res) => {
+            console.log("Service Worker is fetching resource: " + event.request.url);
+            return res || fetch(event.request).then((response) => {
+                return caches.open(cacheName).then((cache) => {
+                    console.log("Service Worker is caching new resource: " + event.request.url);
+                    cache.put(event.request, request.clone());
+                    return response;
+                });
+            });
+        })
+    )
+});
